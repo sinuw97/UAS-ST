@@ -2,6 +2,7 @@ import express from "express";
 import sequelize from "./db/database.js";
 import dotenv from "dotenv";
 import authRouters from "./routes/authRoute.js";
+import financeRouter from "./routes/financeRoute.js";
 import cors from "cors";
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(cors());
 
 // routes
 app.use("/auth", authRouters);
+app.use("/finance", financeRouter);
 
 try {
   await sequelize.authenticate();
