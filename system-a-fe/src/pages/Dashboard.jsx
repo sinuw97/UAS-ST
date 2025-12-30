@@ -1,36 +1,50 @@
 import { ChartSaldo } from "../components/BalanceGraph";
+import { SideBar } from "../components/SideBar";
+import { useState, useEffect } from "react";
+import { fetchDashboard, getAccessToken } from "../service/api";
 
 export const Dashboard = () => {
+  const [user, setUser] = useState("");
+  const [balance, setBalance] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = getAccessToken();
+
+    if (!token) {
+      window.location.href = "/";
+      return;
+    }
+
+    const loadDashboard = async () => {
+      try {
+        const res = await fetchDashboard();
+        setUser(res.name);
+        setBalance(res.totalSaldo);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load dashboard");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading dashboard...
+      </div>
+    );
+  }
+
   return (
     <main>
       <div className="flex w-full h-[730px]">
         {/* Side Bar */}
-        <div className="w-1/5 h-auto bg-[#141414] text-[#fefefe]">
-          {/* Logo/Icon */}
-          <div className="p-7">
-            <h1 className="text-lg font-semibold text-center">
-              Sistem Koperasi TSU
-            </h1>
-          </div>
-
-          <div className="border border-1-[#141414] opacity-35 w-full h-0"></div>
-
-          {/* Menu */}
-          <div className="p-5 flex flex-col gap-3">
-            <h3 className="opacity-65">Main Menu</h3>
-            {/* List Menu */}
-            <div className="hover:bg-[#363636] p-2 rounded-md">Dashboard</div>
-            <div className="hover:bg-[#363636] p-2 rounded-md">Transaksi</div>
-            <div className="hover:bg-[#363636] p-2 rounded-md">Saldo</div>
-            <div className="hover:bg-[#363636] p-2 rounded-md">Buget</div>
-          </div>
-
-          {/* Setting */}
-          <div className="p-5 flex flex-col gap-3 mt-55">
-            <div className="p-2 rounded-md">Setting</div>
-            <div className="p-2 rounded-md">Logout</div>
-          </div>
-        </div>
+        <SideBar />
 
         {/* Main Content */}
         <div className="w-4/5 h-auto bg-[#e6e6e6] text-[#313638]">
@@ -39,7 +53,7 @@ export const Dashboard = () => {
             <div>
               <h3 className="text-xl font-bold">Dashboard</h3>
               <p className="opacity-70">
-                Laporan keuangan untuk{" "}
+                Laporan keuangan bulan ini{" "}
                 <span className="font-semibold">
                   Des 01, 2025 - Des 31, 2025
                 </span>
@@ -49,19 +63,21 @@ export const Dashboard = () => {
             <div className="bg-[#ebebeb] rounded-3xl px-2 py-1">
               <h4 className="flex items-center justify-center gap-1">
                 <img
-                  src="https://ui-avatars.com/api/?name=John+Doe&font-size=0,5&background=013F4E&color=fff"
+                  src={`https://ui-avatars.com/api/?name=${user}&font-size=0,5&background=013F4E&color=fff`}
                   alt="photo"
-                  className="w-10 h-10  rounded-3xl"
+                  className="w-10 h-10 rounded-3xl"
                 />
-                John Doe
+                {user}
               </h4>
             </div>
           </div>
 
           {/* Welcome Card */}
           <div className="bg-[#fefefe] mx-10 my-6 rounded-md">
-            <div class="h-3 bg-gradient-to-r from-[#FFE55C] via-[#E8BE00] to-[#B59400]"></div>
-            <h3 className="font-semibold text-xl px-5 pt-3">Selamat Datang</h3>
+            <div className="h-3 bg-gradient-to-r from-[#FFE55C] via-[#E8BE00] to-[#B59400]"></div>
+            <h3 className="font-semibold text-xl px-5 pt-3">
+              Selamat Datang, {user}!
+            </h3>
             <p className="text-sm opacity-55 px-5 pb-3">
               Pada sistem koperasi TSU! Lorem ipsum dolor sit amet
             </p>
@@ -79,7 +95,9 @@ export const Dashboard = () => {
                   <p className="text-xl opacity-80 font-semibold ">
                     Total Saldo
                   </p>
-                  <h2 className="text-2xl font-bold">Rp 22.933,92</h2>
+                  <h2 className="text-2xl font-bold">
+                    Rp {Number(balance || 0).toLocaleString("id-ID")}
+                  </h2>
                 </div>
 
                 {/* Chart */}
@@ -95,7 +113,9 @@ export const Dashboard = () => {
                   <h2 className="text-xl font-bold text-green-600">
                     Rp 28.933.92
                   </h2>
-                  <p className="text-sm text-green-500 mb-2">+5% vs last month</p>
+                  <p className="text-sm text-green-500 mb-2">
+                    +5% vs last month
+                  </p>
                 </div>
 
                 {/* Expense */}
@@ -104,7 +124,9 @@ export const Dashboard = () => {
                   <h2 className="text-xl font-bold text-red-600">
                     Rp 12.933.92
                   </h2>
-                  <p className="text-sm text-red-500 mb-2">-12% vs last month</p>
+                  <p className="text-sm text-red-500 mb-2">
+                    -12% vs last month
+                  </p>
                 </div>
               </div>
             </div>

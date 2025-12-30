@@ -1,10 +1,10 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/database.js";
 
-const Account = sequelize.define(
-  "Account",
+const Wallet = sequelize.define(
+  "Wallet",
   {
-    id: {
+    wallet_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
@@ -15,17 +15,21 @@ const Account = sequelize.define(
       unique: true
     },
     balance: {
-      type: DataTypes.DECIMAL(15, 2),
+      type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
     },
+    status: {
+      type: DataTypes.ENUM('Aktif', 'Non-Aktif'),
+      allowNull: false,
+    }
   },
   {
-    tableName: "accounts",
+    tableName: "wallets",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
   }
 )
 
-export default Account;
+export default Wallet;

@@ -1,22 +1,4 @@
-// import { useState } from "react";
-// import axios from "axios";
-
 export default function Login() {
-  // const [token, settoken] = useState("");
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const response = await axios.post("http://localhost:4000/auth/login-with-token", {
-  //       token
-  //     });
-
-  //     console.log("Response ydari sistem A: ", response.data);
-  //   } catch (error) {
-  //     console.error("Error:", error.response?.data || error.message);
-  //   }
-  // };
   const handleSSOLogin = () => {
     // redir ke rute sso sistem-a
     window.location.href = "http://localhost:3000/auth/sso-login";

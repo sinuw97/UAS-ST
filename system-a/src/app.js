@@ -1,9 +1,11 @@
 import express from "express";
 import sequelize from "./db/database.js";
 import dotenv from "dotenv";
+import errorMiddleware from "./middleware/errorMiddleware.js";
 import authRouters from "./routes/authRoute.js";
-import financeRouter from "./routes/financeRoute.js";
+import walletRoute from "./routes/walletRoute.js";
 import cors from "cors";
+import dashboardRoute from "./routes/dashboardRoute.js";
 dotenv.config();
 
 const app = express();
@@ -15,7 +17,11 @@ app.use(cors());
 
 // routes
 app.use("/auth", authRouters);
-app.use("/finance", financeRouter);
+app.use("/wallet", walletRoute);
+app.use("/dashboard", dashboardRoute);
+
+// err
+app.use(errorMiddleware);
 
 try {
   await sequelize.authenticate();

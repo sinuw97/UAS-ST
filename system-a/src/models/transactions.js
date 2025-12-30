@@ -4,33 +4,41 @@ import sequelize from "../db/database.js";
 const Transaction = sequelize.define(
   "Transaction",
   {
-    id: {
+    transaction_id : {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    user_id: {
+    wallet_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      unique: true
     },
     type: {
-      type: DataTypes.ENUM("Credit", "Debit"),
+      type: DataTypes.ENUM("topup", "pembelian"),
       allowNull: false,
     },
     amount: {
-      type: DataTypes.DECIMAL(15, 2),
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM('success', 'failed'),
+      allowNull: false,
+    },
+    reference_id: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     description: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
   },
   {
     tableName: "transactions",
     timestamps: true,
     createdAt: "created_at",
-    updatedAt: "updated_at",
+    updatedAt: false,
   });
 
 export default Transaction;

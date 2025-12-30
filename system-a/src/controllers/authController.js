@@ -1,13 +1,18 @@
-import bcrypt from "bcrypt";
-import User from "../models/users.js";
-
+import {
+  comparePassword,
+  createUser,
+  generateJwtToken,
+  getUserDataByEmail,
+  hashedPassword,
+} from "../services/authService.js";
+import jwt from "jsonwebtoken";
 // register akun
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     // cek email
-    const existingEmail = await User.findOne({ where: { email } });
+    const existingEmail = await getUserDataByEmail(email);
     if (existingEmail) {
       return res.status(409).json({
         message: "Email Already Exist",
@@ -15,27 +20,27 @@ export const register = async (req, res) => {
     }
 
     // enkripsi pw
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPw = await hashedPassword(password);
 
     // save
-    await User.create({
+    await createUser({
       name,
       email,
-      password: hashedPassword,
+      hashedPw,
     });
 
     // return
     return res.status(201).json({
-      message: "Akun berhasil dibuat!"
+      status: "success",
+      message: "Akun berhasil dibuat!",
     });
-    
   } catch (error) {
     return res.status(500).json({
       message: "Server error: ",
       error: error.message,
     });
   }
-}
+};
 
 // login akun
 export const login = async (req, res) => {
@@ -43,41 +48,39 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     //ambil data
-    const userData = await User.findOne({ where: { email }});
+    const userData = await getUserDataByEmail(email);
 
     // cek email
     if (!userData) {
-      return res.status(404).json({ message: "User tidak ditemukan!"});
+      return res.status(404).json({ message: "User tidak ditemukan!" });
     }
 
     // compare pw
-    const decodedPw = await bcrypt.compare(password, userData.password);
+    const decodedPw = await comparePassword(password, userData.password);
     if (!decodedPw) {
       return res.status(401).json({
-        message: "Password tidak cocok!"
+        message: "Password tidak cocok!",
       });
     }
 
-    const token = jwt.sign(
-      {
-        id: userData.id,
-        name: userData.name,
-      },
-      process.env.SECRET_KEY,
-      { expiresIn: "1h" }
-    );
+    const token = generateJwtToken(userData);
 
     // kalau ada flag redirect=b maka redirect ke sistem-b
     if (req.query.redirect === "b") {
-      return res.redirect("http://localhost:5173/callback?token="+token);
+      return res.redirect("http://localhost:5173/callback?token=" + token);
     }
 
-    return res.status(200).json({ message: "Login successful", token });
-
+    // login pakai sistem A
+    return res.status(200).json({
+      status: 'success',
+      token
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Server error", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
   }
-}
+};
 
 // redirect ke system-a-fe
 export const ssoLogin = async (req, res) => {
@@ -88,7 +91,29 @@ export const ssoLogin = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       message: "Server error",
-      error: error.message
+      error: error.message,
     });
   }
-}
+};
+
+export const authMe = async (req, res) => {
+  try {
+    const token = req.cookies.access_token;
+
+    if (!token) {
+      return res.status(401).json({ authenticated: false });
+    }
+
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+    return res.status(200).json({
+      authenticated: true,
+      user: {
+        id: decoded.id,
+        name: decoded.name,
+      },
+    });
+  } catch (error) {
+    return res.status(401).json({ authenticated: false });
+  }
+};

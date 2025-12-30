@@ -1,17 +1,17 @@
-import User from "./users";
-import Account from "./accounts";
-import Transaction from "./transactions";
+import User from "./users.js";
+import Wallet from "./wallets.js";
+import Transaction from "./transactions.js";
 
-// User -> Account 1:1
-User.hasOne(Account, { foreignKey: "user_id"});
-Account.belongsTo(User, { foreignKey: "user_id"});
+// User -> Wallet 1:1
+User.hasOne(Wallet, { foreignKey: "user_id"});
+Wallet.belongsTo(User, { foreignKey: "user_id"});
 
-// User -> Transaction 1:N
-User.hasMany(Transaction, { foreignKey: "user_id" });
-Transaction.belongsTo(User, { foreignKey: "user_id" });
+// Wallet -> Transaction 1:N
+Wallet.hasMany(Transaction, { foreignKey: "wallet_id" });
+Transaction.belongsTo(Wallet, { foreignKey: "wallet_id" });
 
 export {
   User,
-  Account,
+  Wallet,
   Transaction
 };
