@@ -1,31 +1,44 @@
 import { getSaldoChart } from "../services/dashboard.service.js";
-import { getInfoSaldoById } from "../services/wallet.service.js";
+import {
+  getInfoSaldoById,
+  getSaldoIncomeOutcome,
+} from "../services/wallet.service.js";
 
 export const getDashboard = async (req, res) => {
   try {
     const userId = req.user.id;
 
     // Ambil info saldo
-    const wallet = await getInfoSaldoById(userId);
+    const wallet = await getSaldoIncomeOutcome(userId);
 
     if (!wallet) {
-      console.log("USER ID: ", userId)
-      console.log("HASIL QUERY: ", wallet)
+      console.log("USER ID: ", userId);
+      console.log("HASIL QUERY: ", wallet);
       return res.status(404).json({
         status: "failed",
-        message: "Saldo tidak ditemukan!"
+        message: "Saldo tidak ditemukan!",
       });
     }
+
+    const income = wallet.transaction
+      .filter((t) => t.type === "topup" && t.status === "success")
+      .reduce((total, t) => total + t.amount, 0);
+
+    const outcome = wallet.transaction
+      .filter((t) => t.type === "pembelian" && t.status === "success")
+      .reduce((total, t) => total + t.amount, 0);
 
     return res.status(200).json({
       status: "success",
       data: {
         name: wallet.user.name,
         totalSaldo: wallet.balance,
-        createdAY: wallet.created_at,
-        updatedAt: wallet.updated_at
-      }
-    })
+        income,
+        outcome,
+        createdAt: wallet.created_at,
+        updatedAt: wallet.updated_at,
+      },
+    });
   } catch (error) {
     console.error("DASHBOARD ERROR:", error.message);
     return res.status(500).json({
@@ -34,11 +47,10 @@ export const getDashboard = async (req, res) => {
       error: error.message,
     });
   }
-}
+};
 
 // Chart saldo di dashboard
 export const chartSaldoDashboard = async (req, res) => {
-  console.log("MASUK CONTROLLER CHART");
   try {
     const userId = req.user.id;
 
@@ -46,7 +58,7 @@ export const chartSaldoDashboard = async (req, res) => {
     if (!wallet) {
       return res.status(404).json({
         status: "failed",
-        message: "Wallet tidak ditemukan!"
+        message: "Wallet tidak ditemukan!",
       });
     }
 
@@ -54,7 +66,7 @@ export const chartSaldoDashboard = async (req, res) => {
     if (!chartData) {
       return res.status(404).json({
         status: "failed",
-        message: "Data chart tidak ditemukan!"
+        message: "Data chart tidak ditemukan!",
       });
     }
 
@@ -70,4 +82,4 @@ export const chartSaldoDashboard = async (req, res) => {
       error: error.message,
     });
   }
-}
+};

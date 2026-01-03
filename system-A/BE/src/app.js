@@ -3,6 +3,8 @@ import cors from "cors";
 import sequelize from "./configs/database.config.js";
 import authRoute from "./routes/auth.route.js";
 import dashboardRoute from "./routes/dashboard.route.js";
+import walletRoute from "./routes/wallet.route.js";
+import transactionRoute from "./routes/transaction.route.js";
 
 const app = express();
 const PORT = 3000;
@@ -13,7 +15,9 @@ app.use(cors());
 
 // Route
 app.use("/auth", authRoute);
-app.use("/dashboard", dashboardRoute)
+app.use("/dashboard", dashboardRoute);
+app.use("/wallet", walletRoute);
+app.use("/transaction", transactionRoute);
 
 // DB
 try {

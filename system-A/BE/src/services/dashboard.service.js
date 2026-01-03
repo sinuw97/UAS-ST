@@ -2,7 +2,7 @@ import { Transaction } from "../models/index.js";
 
 export const getSaldoChart = async (walletId) => {
   const transaksi = await Transaction.findAll({
-    where: { wallet_id: walletId, status: "success" },
+    where: { wallet_id: walletId, status: "success", type: "topup" },
     order: [["created_at", "ASC"]],
   });
 

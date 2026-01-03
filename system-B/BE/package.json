@@ -2,6 +2,7 @@
   "name": "be-system-b",
   "version": "1.0.0",
   "description": "be utk sistem B",
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "dev": "nodemon src/app.js"

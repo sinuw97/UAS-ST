@@ -28,7 +28,7 @@ const Transaction = sequelize.define(
     },
     reference_id: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     description: {
       type: DataTypes.STRING,

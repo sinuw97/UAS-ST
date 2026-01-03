@@ -17,6 +17,9 @@ export const getInfoSaldoById = async (userId) => {
       {
         model: User,
         as: "user",
+        attributes: {
+          exclude: ['password']
+        }
       },
     ],
   });
@@ -78,6 +81,63 @@ export const deductSaldo = async ({ userId, amount, referenceId }) => {
         status: "success",
         reference_id: referenceId,
         description: "Pembelian berhasil",
+      },
+      { transaction: t }
+    );
+
+    return wallet;
+  });
+};
+
+// Get info saldo + transaction history
+export const getSaldoIncomeOutcome = async (userId) => {
+  return await Wallet.findOne({
+    where: { user_id: userId },
+    include: [
+      {
+        model: User,
+        as: "user",
+      },
+      {
+        model: Transaction,
+        as: "transaction",
+        where: {
+          status: "success",
+        },
+        required: false,
+      },
+    ],
+  });
+};
+
+// Top up
+export const topupSaldo = async (userId, amount) => {
+  return await sequelize.transaction(async (t) => {
+    const wallet = await Wallet.findOne({
+      where: { user_id: userId },
+      lock: t.LOCK.UPDATE,
+      transaction: t,
+    });
+
+    if (!wallet) {
+      throw new Error("Wallet tidak ditemukan");
+    }
+
+    if (amount < 10000) {
+      throw new Error("Jumlah harus lebih dari Rp. 10.000!");
+    }
+
+    wallet.balance += amount;
+    await wallet.save({ transaction: t });
+
+    await Transaction.create(
+      {
+        wallet_id: wallet.wallet_id,
+        type: "topup",
+        amount,
+        status: "success",
+        reference_id: null,
+        description: `top up saldo sebesar Rp. ${amount}`,
       },
       { transaction: t }
     );
